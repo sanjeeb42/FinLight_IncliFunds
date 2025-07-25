@@ -1,173 +1,125 @@
-# FinTwin+ - AI-Powered Financial Education Platform
+# FinTwin+ 🚀
+*By IncliFunds*
 
-FinTwin+ is a comprehensive financial education platform that combines AI-powered learning, interactive simulations, and personalized financial guidance to help users improve their financial literacy.
+**AI-Powered Financial Education Platform for Everyone**
 
-## Features
+FinTwin+ democratizes financial literacy through personalized AI guidance, making complex financial concepts accessible to users of all backgrounds. Our platform combines interactive learning, real-time simulations, and voice-powered assistance to build confident financial decision-makers.
 
-- 🤖 AI-powered voice assistant for financial guidance
-- 📚 Interactive financial lessons and tutorials
-- 🎯 Personalized financial assessments
-- 💰 Savings goals tracking
-- 🏛️ Government schemes information
-- 👥 Community learning platform
-- 📊 Financial simulations
+## 🎯 What FinTwin+ Does
 
-## Tech Stack
+**Personalized Financial Education**
+- Take assessments to identify your financial knowledge gaps
+- Get customized learning paths based on your profile
+- Access bite-sized lessons on budgeting, investing, and saving
 
-**Frontend:**
-- React + TypeScript + Vite
-- Tailwind CSS for styling
-- Zustand for state management
-- Lucide React for icons
+**AI-Powered Voice Assistant**
+- Ask financial questions in natural language
+- Get instant, personalized advice
+- Practice financial scenarios through voice interaction
 
-**Backend:**
-- FastAPI (Python)
-- SQLite database
-- Google Cloud Speech API
-- Gemini AI integration
+**Interactive Financial Simulations**
+- Experience real-world financial decisions in a safe environment
+- Test investment strategies with virtual portfolios
+- Learn from mistakes without real financial consequences
 
-## Getting Started
+**Community & Government Resources**
+- Connect with other learners in community forums
+- Discover relevant government financial schemes
+- Track and achieve your savings goals
+
+## ✨ Key Features
+
+- 🤖 **Smart AI Assistant** - Voice-powered financial guidance
+- 📚 **Interactive Lessons** - Gamified learning modules
+- 🎯 **Personal Assessment** - Tailored financial health check
+- 💰 **Goal Tracking** - Visual savings and investment progress
+- 🏛️ **Government Schemes** - Discover financial benefits you qualify for
+- 👥 **Community Learning** - Learn from peers and experts
+- 📊 **Risk-Free Simulations** - Practice with virtual money
+
+## 🛠️ Built With
+
+- **Frontend:** React + TypeScript + Tailwind CSS
+- **Backend:** FastAPI + Python
+- **AI:** Google Gemini + Speech Recognition
+- **Database:** SQLite
+
+## 🚀 Quick Start
 
 ### Prerequisites
-
-- Node.js (v18 or higher)
+- Node.js 18+
 - Python 3.8+
-- Git
 
-### Installation
+### Setup
 
-1. Clone the repository:
+1. **Clone & Install**
 ```bash
-git clone <your-repo-url>
-cd Deutsche\ Bank\ Hackathon
-```
-
-2. Install frontend dependencies:
-```bash
+git clone https://github.com/sanjeeb42/FinLight_IncliFunds.git
+cd FinLight_IncliFunds
 npm install
+cd backend && pip install -r requirements.txt
 ```
 
-3. Set up backend:
+2. **Configure Environment**
 ```bash
-cd backend
-pip install -r requirements.txt
-```
-
-4. Configure environment variables:
-```bash
-# Copy the example environment file
 cp backend/.env.example backend/.env
-# Edit backend/.env with your actual API keys
+# Add your API keys to backend/.env
 ```
 
-### Environment Variables
-
-Create a `backend/.env` file with the following variables:
-
-```env
-# Required API Keys
-GEMINI_API_KEY=your-gemini-api-key-here
-OPENAI_API_KEY=your-openai-api-key-here
-GOOGLE_CLOUD_API_KEY=your-google-cloud-api-key-here
-
-# Database
-DATABASE_URL=sqlite:///./fintwin.db
-
-# JWT Configuration
-SECRET_KEY=your-secret-key-here
-
-# Other configurations (see .env.example for full list)
-```
-
-### Running the Application
-
-1. Start the backend server:
+3. **Run the Application**
 ```bash
-cd backend
-python main.py
-```
+# Terminal 1: Start backend
+cd backend && python main.py
 
-2. Start the frontend development server:
-```bash
+# Terminal 2: Start frontend
 npm run dev
 ```
 
-3. Open your browser and navigate to `http://localhost:5173`
+4. **Access the App**
+Open `http://localhost:5173` in your browser
 
-## Deployment
+### Required API Keys
+- **Gemini AI** - For intelligent financial advice
+- **Google Cloud Speech** - For voice interactions
+- See `backend/.env.example` for complete configuration
 
-### Important Security Notes
+## 🎯 Who Is This For?
 
-- **Never commit `.env` files** - They contain sensitive API keys
-- **Always use `.env.example`** as a template for required environment variables
-- **Set up environment variables** in your deployment platform (Vercel, Netlify, etc.)
+- **Students** learning personal finance fundamentals
+- **Young professionals** starting their financial journey
+- **Anyone** wanting to improve their financial literacy
+- **Educators** teaching financial concepts
 
-### Frontend Deployment (Vercel)
+## 🌟 Why FinTwin+?
 
-1. Push your code to GitHub (ensure `.env` files are gitignored)
-2. Connect your repository to Vercel
-3. Deploy automatically
+**Traditional financial education is often:**
+- Complex and intimidating
+- One-size-fits-all approach
+- Theoretical without practical application
 
-### Backend Deployment
+**FinTwin+ makes it:**
+- ✅ **Personalized** - AI adapts to your learning style
+- ✅ **Interactive** - Learn by doing, not just reading
+- ✅ **Accessible** - Voice interface breaks down barriers
+- ✅ **Safe** - Practice with virtual money before real decisions
 
-1. Set up your Python environment on your hosting platform
-2. Configure environment variables in your hosting platform
-3. Install dependencies: `pip install -r requirements.txt`
-4. Run the application
+## 📱 Demo
 
-## Contributing
+1. **Take Assessment** → Get personalized financial profile
+2. **Learn Interactively** → Bite-sized lessons with real examples
+3. **Practice Safely** → Simulate investments and budgeting
+4. **Get AI Guidance** → Ask questions, get instant answers
+5. **Track Progress** → Visual goals and achievement system
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Ensure all tests pass
-5. Submit a pull request
+## 🤝 Contributing
 
-## Expanding the ESLint configuration
+We welcome contributions! Please feel free to submit issues and pull requests.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📄 License
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+MIT License - feel free to use this project for learning and development.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  extends: [
-    // other configs...
-    // Enable lint rules for React
-    reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
-    reactDom.configs.recommended,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+**Built with ❤️ by IncliFunds Team**  
+*Making financial literacy accessible to everyone*
