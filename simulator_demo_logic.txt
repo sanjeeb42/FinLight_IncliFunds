@@ -1,0 +1,399 @@
+import React, { useState, useEffect } from 'react';
+
+// --- Helper Components & Data ---
+
+// Icon components for better UI
+const ICONS = {
+  'monthly-budget': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+  'can-i-afford': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>,
+  'savings-goal': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>,
+  'expense-reduction': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  'life-event': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
+  'loan-impact': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h6m-5 0a3 3 0 110 6H9l-2 2V9a2 2 0 012-2zmFm-5 0a3 3 0 110 6H9l-2 2V9a2 2 0 012-2zM9 11h.01" /></svg>,
+  'income-drop': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>,
+  'festive-spending': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v1a2 2 0 01-2 2H7a2 2 0 01-2-2V5zM4 13a2 2 0 012-2h12a2 2 0 012 2v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5z" /></svg>,
+  'retirement-readiness': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
+  'weather-impact': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>,
+  'emi-dilemma': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  'investment-planning': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
+  'best-option': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>,
+  'ai-insight': ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>,
+};
+
+
+const SIMULATIONS = [
+    { id: 'monthly-budget', title: 'Monthly Budget Forecast', description: 'Show me how my money flows this month.', icon: 'monthly-budget', inputs: [] },
+    { id: 'can-i-afford', title: 'Can I Afford This?', description: 'e.g., Can I buy a new phone?', icon: 'can-i-afford', inputs: [{ name: 'expenseName', label: 'Item Name', type: 'text' }, { name: 'expenseAmount', label: 'One-time Cost (₹)', type: 'number' }] },
+    { id: 'savings-goal', title: 'Savings Goal Tracker', description: 'e.g., How long to save ₹50,000?', icon: 'savings-goal', inputs: [{ name: 'goalAmount', label: 'Goal Amount (₹)', type: 'number' }] },
+    { id: 'expense-reduction', title: 'Expense Reduction Impact', description: 'e.g., Reduce eating out by ₹1,000?', icon: 'expense-reduction', inputs: [{ name: 'reductionAmount', label: 'Monthly Reduction (₹)', type: 'number' }] },
+    { id: 'life-event', title: 'Life Event Planner', description: 'e.g., What if I have a baby?', icon: 'life-event', inputs: [{ name: 'eventName', label: 'Event Name (e.g., Birth of a child)', type: 'text' }, { name: 'eventCost', label: 'Estimated Monthly Cost (₹)', type: 'number' }, { name: 'oneTimeCost', label: 'One-time Cost (₹)', type: 'number' }] },
+    { id: 'loan-impact', title: 'Loan Impact Estimator', description: 'e.g., A microloan of ₹20,000 for 12 months.', icon: 'loan-impact', inputs: [{ name: 'loanAmount', label: 'Loan Amount (₹)', type: 'number' }, { name: 'loanTenure', label: 'Tenure (Months)', type: 'number' }, { name: 'interestRate', label: 'Annual Interest Rate (%)', type: 'number' }] },
+    { id: 'income-drop', title: 'Income Drop Alert', description: 'e.g., Income reduced by ₹5,000.', icon: 'income-drop', inputs: [{ name: 'incomeReduction', label: 'Monthly Income Reduction (₹)', type: 'number' }] },
+    { id: 'festive-spending', title: 'Festive Season Spending', description: 'e.g., How will Diwali shopping affect my savings?', icon: 'festive-spending', inputs: [{ name: 'festiveCost', label: 'Total Festive Spending (₹)', type: 'number' }] },
+    { id: 'retirement-readiness', title: 'Retirement Readiness', description: 'e.g., How much to save for retirement?', icon: 'retirement-readiness', inputs: [{ name: 'currentAge', label: 'Your Current Age', type: 'number' }, { name: 'retirementAge', label: 'Target Retirement Age', type: 'number' }, { name: 'desiredMonthlyIncome', label: 'Desired Monthly Income post-retirement (₹)', type: 'number' }] },
+    { id: 'weather-impact', title: 'Weather/Event Impact', description: 'e.g., How will 2 weeks of rain affect my income?', icon: 'weather-impact', inputs: [{ name: 'daysLost', label: 'Number of Days with No Income', type: 'number' }] },
+    { id: 'emi-dilemma', title: 'EMI vs Saving Dilemma', description: 'e.g., Take an EMI or wait and save?', icon: 'emi-dilemma', inputs: [{ name: 'itemCost', label: 'Item Cost (₹)', type: 'number' }, { name: 'downPayment', label: 'Down Payment (if any) (₹)', type: 'number' }, { name: 'loanTenure', label: 'EMI Tenure (Months)', type: 'number' }, { name: 'interestRate', label: 'Annual Interest Rate (%)', type: 'number' }] },
+    { id: 'investment-planning', title: 'Investment Planning', description: 'e.g., Invest ₹2,000/month for 5 years.', icon: 'investment-planning', inputs: [{ name: 'monthlyInvestment', label: 'Monthly Investment (₹)', type: 'number' }, { name: 'investmentYears', label: 'Investment Duration (Years)', type: 'number' }, { name: 'expectedReturn', label: 'Expected Annual Return (%)', type: 'number' }] },
+    { id: 'best-option', title: 'Best Option Selector', description: 'e.g., Compare buying a scooter vs. public transport.', icon: 'best-option', inputs: [{ name: 'optionOneName', label: 'Option 1 Name', type: 'text' }, { name: 'optionOneUpfront', label: 'Option 1 Upfront Cost (₹)', type: 'number' }, { name: 'optionOneMonthly', label: 'Option 1 Monthly Cost (₹)', type: 'number' }, { name: 'optionTwoName', label: 'Option 2 Name', type: 'text' }, { name: 'optionTwoUpfront', label: 'Option 2 Upfront Cost (₹)', type: 'number' }, { name: 'optionTwoMonthly', label: 'Option 2 Monthly Cost (₹)', type: 'number' }] },
+];
+
+// --- Core Components ---
+
+const UserProfile = ({ profile, setProfile, setView }) => {
+    const [formData, setFormData] = useState(profile);
+
+    const handleChange = (e) => {
+        const { name, value, type } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+    };
+
+    const handleSave = () => {
+        setProfile(formData);
+        setView('dashboard');
+    };
+
+    return (
+        <div className="p-4 md:p-8 bg-gray-50 rounded-xl shadow-lg animate-fade-in">
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Your Financial Profile</h2>
+            <p className="text-gray-500 mb-8">This information helps us provide accurate simulations. It's safe with us.</p>
+            
+            <div className="space-y-6">
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-3 border-b pb-2">Income</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label className="block">
+                            <span className="text-gray-600">Monthly Income (₹)</span>
+                            <input type="number" name="income" value={formData.income} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                        </label>
+                        <label className="block">
+                            <span className="text-gray-600">Income Type</span>
+                            <select name="incomeType" value={formData.incomeType} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <option>Fixed</option>
+                                <option>Daily</option>
+                                <option>Seasonal</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-3 border-b pb-2">Monthly Expenses</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <label className="block"><span className="text-gray-600">Rent/Housing (₹)</span><input type="number" name="rent" value={formData.rent} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                         <label className="block"><span className="text-gray-600">Food/Groceries (₹)</span><input type="number" name="food" value={formData.food} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                         <label className="block"><span className="text-gray-600">Transport (₹)</span><input type="number" name="transport" value={formData.transport} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                         <label className="block"><span className="text-gray-600">Utilities (Bills) (₹)</span><input type="number" name="utilities" value={formData.utilities} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                         <label className="block"><span className="text-gray-600">Other (Entertainment, etc.) (₹)</span><input type="number" name="other" value={formData.other} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-3 border-b pb-2">Savings & Liabilities</h3>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label className="block"><span className="text-gray-600">Current Savings (₹)</span><input type="number" name="savings" value={formData.savings} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                        <label className="block"><span className="text-gray-600">Monthly Savings Goal (₹)</span><input type="number" name="monthlySavingGoal" value={formData.monthlySavingGoal} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                        <label className="block"><span className="text-gray-600">Existing Loan EMIs (₹)</span><input type="number" name="emis" value={formData.emis} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" /></label>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-8 text-right">
+                <button onClick={handleSave} className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                    Save & Continue
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const Dashboard = ({ setView, onSelectSimulation }) => {
+    return (
+        <div className="animate-fade-in">
+            <div className="text-center mb-8 md:mb-12">
+                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800">AI-Powered Financial Simulator</h1>
+                <p className="mt-3 text-lg text-gray-500 max-w-2xl mx-auto">Choose a scenario to see how financial decisions could impact your life, with personalized AI insights.</p>
+                <button onClick={() => setView('profile')} className="mt-4 text-indigo-600 hover:text-indigo-800 font-semibold">
+                    Edit Financial Profile →
+                </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {SIMULATIONS.map(sim => {
+                    const Icon = ICONS[sim.icon];
+                    return (
+                        <button key={sim.id} onClick={() => onSelectSimulation(sim)} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left flex flex-col">
+                            <div className="flex-shrink-0">
+                                <div className="bg-indigo-100 text-indigo-600 rounded-lg w-12 h-12 flex items-center justify-center">
+                                    <Icon className="w-7 h-7" />
+                                </div>
+                            </div>
+                            <div className="flex-grow mt-4">
+                                <h3 className="text-lg font-bold text-gray-900">{sim.title}</h3>
+                                <p className="mt-2 text-sm text-gray-500">{sim.description}</p>
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+const SimulationModal = ({ simulation, profile, onClose }) => {
+    const [inputs, setInputs] = useState({});
+    const [result, setResult] = useState(null);
+    const [aiAdvice, setAiAdvice] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const AiInsightIcon = ICONS['ai-insight'];
+
+    useEffect(() => {
+        setInputs({});
+        setResult(null);
+        setAiAdvice('');
+    }, [simulation]);
+
+    const handleChange = (e) => {
+        const { name, value, type } = e.target;
+        setInputs(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+    };
+
+    const getAIAdvice = async (prompt) => {
+        setIsLoading(true);
+        setAiAdvice('');
+        try {
+            const apiKey = ""; // API key is handled by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }]
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API call failed with status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates.length > 0 && data.candidates[0].content.parts.length > 0) {
+                setAiAdvice(data.candidates[0].content.parts[0].text);
+            } else {
+                 setAiAdvice("Sorry, I couldn't generate advice for this scenario. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error fetching AI advice:", error);
+            setAiAdvice("There was an error getting AI advice. Please check your connection and try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRun = () => {
+        const simResult = runSimulation(simulation.id, profile, inputs);
+        setResult(simResult);
+
+        // Construct a prompt for the AI
+        const prompt = `
+            As a friendly and encouraging financial advisor in India, analyze the following scenario for a user and provide brief, actionable advice in 2-3 sentences.
+            
+            User's Financial Profile:
+            - Monthly Income: ₹${profile.income} (${profile.incomeType})
+            - Total Monthly Expenses: ₹${profile.rent + profile.food + profile.transport + profile.utilities + profile.other + profile.emis}
+            - Current Savings: ₹${profile.savings}
+            - Monthly Savings Goal: ₹${profile.monthlySavingGoal}
+
+            Simulation Run: "${simulation.title}"
+            User's Input for Simulation: ${JSON.stringify(inputs)}
+            
+            Simulation Result:
+            - Title: ${simResult.title}
+            - Summary: ${simResult.summary}
+
+            Based on this, what is your advice? Keep it simple, positive, and focused on the next step the user can take.
+        `;
+        getAIAdvice(prompt);
+    };
+    
+    const runSimulation = (id, userProfile, simInputs) => {
+        const totalExpenses = userProfile.rent + userProfile.food + userProfile.transport + userProfile.utilities + userProfile.other + userProfile.emis;
+        const disposableIncome = userProfile.income - totalExpenses;
+
+        switch (id) {
+            case 'monthly-budget':
+                return { title: "Monthly Budget Breakdown", summary: `You have ₹${disposableIncome.toFixed(2)} left after all expenses.`, color: disposableIncome > 0 ? 'green' : 'red' };
+            case 'can-i-afford':
+                const canAfford = disposableIncome >= simInputs.expenseAmount;
+                return { title: `Affordability Check: ${simInputs.expenseName || 'Item'}`, summary: canAfford ? `Yes, you can afford it. You will have ₹${(disposableIncome - simInputs.expenseAmount).toFixed(2)} remaining this month.` : `Not recommended. This would create a deficit of ₹${(simInputs.expenseAmount - disposableIncome).toFixed(2)}.`, color: canAfford ? 'green' : 'red' };
+            case 'savings-goal':
+                if (userProfile.monthlySavingGoal <= 0) return { title: "Savings Goal", summary: "Your 'Monthly Savings Goal' in your profile is not set. Please update it.", color: 'orange' };
+                const monthsToGoal = simInputs.goalAmount / userProfile.monthlySavingGoal;
+                return { title: `Reaching Your ₹${simInputs.goalAmount} Goal`, summary: `It will take you approximately ${Math.ceil(monthsToGoal)} months (about ${(monthsToGoal / 12).toFixed(1)} years) to reach your goal.`, color: 'blue' };
+            case 'expense-reduction':
+                const newDisposable = disposableIncome + simInputs.reductionAmount;
+                return { title: "Expense Reduction Impact", summary: `By reducing expenses by ₹${simInputs.reductionAmount}, your new monthly disposable income will be ₹${newDisposable.toFixed(2)}.`, color: 'green' };
+            case 'life-event':
+                const newTotalExpensesLifeEvent = totalExpenses + simInputs.eventCost;
+                const newDisposableLifeEvent = userProfile.income - newTotalExpensesLifeEvent;
+                return { title: `Impact of ${simInputs.eventName || 'Life Event'}`, summary: `This event adds ₹${simInputs.eventCost} to monthly costs. Your new disposable income will be ₹${newDisposableLifeEvent.toFixed(2)}. The one-time cost is ₹${simInputs.oneTimeCost}.`, color: newDisposableLifeEvent > 0 ? 'blue' : 'red' };
+            case 'loan-impact':
+                const monthlyInterestRate = (simInputs.interestRate / 100) / 12;
+                const emi = simInputs.loanAmount * monthlyInterestRate * (Math.pow(1 + monthlyInterestRate, simInputs.loanTenure)) / (Math.pow(1 + monthlyInterestRate, simInputs.loanTenure) - 1) || 0;
+                const newDisposableLoan = disposableIncome - emi;
+                return { title: "Loan Impact Analysis", summary: `The estimated EMI is ₹${emi.toFixed(2)}. Your disposable income would be ₹${newDisposableLoan.toFixed(2)}.`, color: newDisposableLoan > 0 ? 'green' : 'red' };
+            case 'income-drop':
+                const newIncome = userProfile.income - simInputs.incomeReduction;
+                const newDisposableDrop = newIncome - totalExpenses;
+                return { title: "Income Drop Alert", summary: `With a reduced income of ₹${newIncome}, your new disposable income would be ₹${newDisposableDrop.toFixed(2)}.`, color: newDisposableDrop > 0 ? 'blue' : 'red' };
+            case 'festive-spending':
+                const canCoverFestive = userProfile.savings >= simInputs.festiveCost;
+                return { title: "Festive Spending Impact", summary: `This spending of ₹${simInputs.festiveCost} will reduce your savings to ₹${(userProfile.savings - simInputs.festiveCost).toFixed(2)}.`, color: canCoverFestive ? 'blue' : 'orange' };
+            case 'retirement-readiness':
+                 const yearsToRetire = simInputs.retirementAge - simInputs.currentAge;
+                 if (yearsToRetire <= 0) return { title: "Retirement Readiness", summary: "Retirement age must be in the future.", color: 'orange' };
+                 // Simplified model: This needs a proper financial formula for accuracy
+                 const requiredCorpus = simInputs.desiredMonthlyIncome * 12 * 25; // A common rule of thumb (25x rule)
+                 const monthlyInvestmentNeeded = requiredCorpus / (yearsToRetire * 12);
+                 return { title: "Retirement Readiness", summary: `To get ₹${simInputs.desiredMonthlyIncome}/month in retirement, you need a corpus of ~₹${requiredCorpus.toFixed(2)}. You should aim to invest ~₹${monthlyInvestmentNeeded.toFixed(2)} monthly.`, color: 'blue' };
+            case 'weather-impact':
+                 const dailyIncome = userProfile.incomeType === 'Daily' ? userProfile.income / 30 : userProfile.income / 22; // Assume 30 for daily, 22 for fixed/seasonal
+                 const incomeLost = dailyIncome * simInputs.daysLost;
+                 return { title: "Weather/Event Impact", summary: `Losing ${simInputs.daysLost} days of work could mean an income loss of approximately ₹${incomeLost.toFixed(2)}.`, color: 'red' };
+            case 'emi-dilemma':
+                const loanAmountForEmi = simInputs.itemCost - simInputs.downPayment;
+                const monthlyInterestEmi = (simInputs.interestRate / 100) / 12;
+                const emiValue = loanAmountForEmi * monthlyInterestEmi * (Math.pow(1 + monthlyInterestEmi, simInputs.loanTenure)) / (Math.pow(1 + monthlyInterestEmi, simInputs.loanTenure) - 1) || 0;
+                const monthsToSave = (simInputs.itemCost - simInputs.downPayment) / userProfile.monthlySavingGoal;
+                return { title: "EMI vs Saving", summary: `Option 1 (EMI): Pay ₹${emiValue.toFixed(2)} for ${simInputs.loanTenure} months. Option 2 (Save): It would take you ~${Math.ceil(monthsToSave)} months to save for it.`, color: 'blue' };
+            case 'investment-planning':
+                const P = simInputs.monthlyInvestment;
+                const r = (simInputs.expectedReturn / 100) / 12;
+                const n = simInputs.investmentYears * 12;
+                const futureValue = P * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+                const totalInvested = P * n;
+                return { title: "Investment Growth Projection", summary: `Investing ₹${P}/month for ${simInputs.investmentYears} years could grow to ~₹${futureValue.toFixed(2)}. Total amount invested would be ₹${totalInvested.toFixed(2)}.`, color: 'green' };
+            case 'best-option':
+                const totalCost1 = simInputs.optionOneUpfront + (simInputs.optionOneMonthly * 12);
+                const totalCost2 = simInputs.optionTwoUpfront + (simInputs.optionTwoMonthly * 12);
+                const cheaperOption = totalCost1 < totalCost2 ? simInputs.optionOneName : simInputs.optionTwoName;
+                return { title: "Option Comparison", summary: `Annual cost for ${simInputs.optionOneName}: ₹${totalCost1.toFixed(2)}. For ${simInputs.optionTwoName}: ₹${totalCost2.toFixed(2)}. ${cheaperOption} seems cheaper over a year.`, color: 'blue' };
+            default:
+                return { title: 'Simulation Result', summary: 'This simulation logic is not yet implemented.', color: 'gray' };
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 animate-fade-in-fast">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="p-6 border-b border-gray-200 flex justify-between items-start">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800">{simulation.title}</h2>
+                        <p className="text-gray-500 mt-1">{simulation.description}</p>
+                    </div>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                
+                <div className="p-6 overflow-y-auto">
+                    {!result ? (
+                        <div className="space-y-4">
+                            {simulation.inputs.map(input => (
+                                <label key={input.name} className="block">
+                                    <span className="text-gray-700 font-medium">{input.label}</span>
+                                    <input
+                                        type={input.type}
+                                        name={input.name}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder={input.type === 'number' ? '0' : ''}
+                                    />
+                                </label>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="animate-fade-in space-y-6">
+                            <div>
+                                <h3 className={`text-xl font-bold text-center mb-2 ${ result.color === 'green' ? 'text-green-600' : result.color === 'red' ? 'text-red-600' : result.color === 'orange' ? 'text-yellow-600' : 'text-blue-600' }`}>{result.title}</h3>
+                                <p className="text-gray-700 text-center text-lg leading-relaxed bg-gray-50 p-4 rounded-lg">{result.summary}</p>
+                            </div>
+                            
+                            <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-r-lg">
+                                <div className="flex items-center mb-2">
+                                    <AiInsightIcon className="w-6 h-6 text-indigo-600 mr-3" />
+                                    <h4 className="text-lg font-bold text-indigo-800">Gemini's AI Insight</h4>
+                                </div>
+                                {isLoading && <p className="text-indigo-700 animate-pulse">Thinking...</p>}
+                                {aiAdvice && <p className="text-indigo-800 leading-relaxed">{aiAdvice}</p>}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-6 border-t border-gray-200 mt-auto bg-gray-50 rounded-b-2xl flex justify-end space-x-4">
+                    <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition">Close</button>
+                    {!result ? (
+                        <button onClick={handleRun} disabled={isLoading} className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition disabled:bg-indigo-300">
+                            {isLoading ? 'Running...' : 'Run Simulation'}
+                        </button>
+                    ) : (
+                         <button onClick={() => { setResult(null); setAiAdvice(''); }} className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                            Run New Simulation
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- Main App Component ---
+
+export default function App() {
+    const [view, setView] = useState('profile'); // 'profile', 'dashboard'
+    const [profile, setProfile] = useState({
+        income: 50000,
+        incomeType: 'Fixed',
+        rent: 15000,
+        food: 8000,
+        transport: 3000,
+        utilities: 2000,
+        other: 4000,
+        savings: 100000,
+        monthlySavingGoal: 5000,
+        emis: 0,
+    });
+    const [selectedSimulation, setSelectedSimulation] = useState(null);
+
+    return (
+        <div className="bg-gray-100 min-h-screen font-sans">
+            <style>{`
+                @keyframes fade-in { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+                @keyframes fade-in-fast { 0% { opacity: 0; } 100% { opacity: 1; } }
+                .animate-fade-in-fast { animation: fade-in-fast 0.3s ease-out forwards; }
+            `}</style>
+            
+            <main className="container mx-auto px-4 py-8 md:py-12">
+                {view === 'profile' && <UserProfile profile={profile} setProfile={setProfile} setView={setView} />}
+                {view === 'dashboard' && <Dashboard setView={setView} onSelectSimulation={setSelectedSimulation} />}
+            </main>
+
+            {selectedSimulation && (
+                <SimulationModal 
+                    simulation={selectedSimulation}
+                    profile={profile}
+                    onClose={() => setSelectedSimulation(null)}
+                />
+            )}
+            
+            <footer className="text-center py-6 text-gray-400 text-sm">
+                <p>AI-Powered Financial Simulator &copy; 2025. Make informed decisions.</p>
+            </footer>
+        </div>
+    );
+}
